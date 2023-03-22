@@ -5,7 +5,7 @@ COS285 Lab 7
 Tokenization: Break down the lyrics of each song into individual words (tokens).
 Preprocessing: Convert all the tokens to lowercase, remove stop words (commonly occurring words like 'the', 'a', 'an', etc.), and remove any special characters like punctuation marks, etc.
 
-(Meghan)
+(Megan)
 Compute TF: Compute the term frequency of each token in each song.
 
 (Esther)
