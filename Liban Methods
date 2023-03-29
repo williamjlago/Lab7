@@ -1,0 +1,57 @@
+private static Map<String, TreeMap<String, Double>> calcTFIDF(Map<String, TreeMap<String, Integer>> map) {
+	    Map<String, TreeMap<String, Double>> tfidfMap = new TreeMap<>();
+	    Map<String, Double> idfMap = calcIDF(map);
+	    for (String title : map.keySet()) {
+	        TreeMap<String, Integer> song = map.get(title);
+	        TreeMap<String, Double> tfidf = new TreeMap<>();
+	        int totalTerms = song.get("TOTALTERMS");
+	        for (String term : song.keySet()) {
+	            if (!term.equals("TOTALTERMS")) {
+	                double tf = (double) song.get(term) / totalTerms;
+	                double idf = idfMap.get(term);
+	                double tfidfScore = tf * idf;
+	                tfidf.put(term, tfidfScore);
+	            }
+	        }
+	        tfidfMap.put(title, tfidf);
+	    }
+	    return tfidfMap;
+	}
+	private static Map<String, Double> processQuery(String query, Map<String, Double> idfMap) {
+	    Map<String, Double> tfidfMap = new TreeMap<>();
+	    int totalTerms = 0;
+	    String[] tokens = query.toLowerCase().replaceAll("[^a-z0-9 ]", "").split("\\s+");
+	    for (String token : tokens) {
+	        if (!idfMap.containsKey(token)) {
+	            continue; // skip tokens that are not in the IDF map
+	        }
+	        totalTerms++;
+	        double tf = 1.0 / tokens.length; // assume all tokens have equal weight in the query
+	        double idf = idfMap.get(token);
+	        double tfidfScore = tf * idf;
+	        tfidfMap.put(token, tfidfScore);
+	    }
+	    // Normalize scores by dividing by the total number of terms in the query
+	    for (String token : tfidfMap.keySet()) {
+	        double tfidfScore = tfidfMap.get(token) / totalTerms;
+	        tfidfMap.put(token, tfidfScore);
+	    }
+	    return tfidfMap;
+	}
+	private static Map<String, Double> rankSongs(Map<String, TreeMap<String, Double>> tfidfMap, Map<String, Double> queryTfidfMap) {
+	    Map<String, Double> scoreMap = new TreeMap<>();
+	    for (String song : tfidfMap.keySet()) {
+	        double score = 0.0;
+	        TreeMap<String, Double> songTfidfMap = tfidfMap.get(song);
+	        for (String token : queryTfidfMap.keySet()) {
+	            if (songTfidfMap.containsKey(token)) {
+	                double tokenScore = songTfidfMap.get(token) * queryTfidfMap.get(token);
+	                score += tokenScore;
+	            }
+	        }
+	        scoreMap.put(song, score);
+	    }
+	    return scoreMap;
+	}
+	
+}
