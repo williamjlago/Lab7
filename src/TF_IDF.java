@@ -17,16 +17,22 @@ public class TF_IDF {
 	static Map<String, TreeMap<String, Integer>> removeStopWords(Map<String, TreeMap<String, Integer>> map) {
 		try {
 		    File f = new File("stopwords.txt");
-		    Scanner s = new Scanner(f);
 		    System.out.println("Successfully read file " + f.getName());
-		    while (s.hasNext()) {
-		    	String word = s.next();
-		    	if (map.containsKey(word)) {
-		    		// this doesn't work; it needs to check the submap of each map element (i.e. each song) instead
-		    		map.remove(word);
-		    	}
-		    }
-		    s.close();
+		    Set<String> songTitles = map.keySet();
+		    Iterator<String> songItr = songTitles.iterator();
+			for (int i = 0; i < songTitles.size(); i++) {
+			    	Scanner s = new Scanner(f);
+				String songName = songItr.next();
+				TreeMap<String, Integer> currSong = map.get(songName);
+				while (s.hasNext()) {
+					String word = s.next();
+					if (currSong.containsKey(word)) {
+						map.remove(word);
+						System.out.println(word + " has been removed from " + songName);
+					}
+				}
+				s.close();
+			}
 		}
 		catch (Exception e) {
 			System.err.print(e.toString());
@@ -79,6 +85,44 @@ public class TF_IDF {
 	public static void main(String args[]) {
 		Map<String, TreeMap<String, Integer>> songs = readFiles();
 		removeStopWords(songs);
+		getTotalTerms(songs); //this adds a key to each song map labeled: "TOTALSONGS", whose value is the total words in the song after removing stop words
+		Map<String, TreeMap<String, Double>> TFMap = TermFreqCalcMap(songs); //Song Title --> Term --> Term Frequency(double)
 	}
 
+	public static void getTotalTerms(Map<String, TreeMap<String, Integer>> map) {
+		Set<String> songTitles = map.keySet();
+		Iterator<String> titleItr = songTitles.iterator();
+		while(titleItr.hasNext()) {
+			int termCount = 0;
+			String title = titleItr.next();
+			TreeMap<String, Integer> currSong = map.get(title);
+			Set<String> terms = currSong.keySet();
+			Iterator<String> termsItr = terms.iterator();
+			while(termsItr.hasNext()) {
+				termCount += currSong.get(termsItr.next());
+			}
+			currSong.put("TOTALTERMS", termCount);
+		}
+	}
+	
+	private static Map<String, TreeMap<String, Double>> TermFreqCalcMap(Map<String, TreeMap<String, Integer>> map) {
+		Map<String, TreeMap<String, Double>> TFMap = new TreeMap<>();
+		Set<String> songTitles = map.keySet();
+		Iterator<String> titleItr = songTitles.iterator();
+		while(titleItr.hasNext()) {
+			TreeMap<String, Double> TFCalc = new TreeMap<String, Double>();
+			String title = titleItr.next();
+			TreeMap<String, Integer> currSong = map.get(title);
+			Set<String> terms = currSong.keySet();
+			Iterator<String> termsItr = terms.iterator();
+			while(termsItr.hasNext()) {
+				String term = termsItr.next();
+				double total = (currSong.get("TOTALTERMS"));
+				double calc = (double) ((currSong.get(term)) / total);
+				TFCalc.put(term, calc);
+			}
+			TFMap.put(title, TFCalc);
+		}
+		return TFMap;
+	}
 }
