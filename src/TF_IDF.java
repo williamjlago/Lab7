@@ -87,7 +87,7 @@ public class TF_IDF {
 		Map<String, TreeMap<String, Integer>> songs = readFiles();
 		removeStopWords(songs);
 		getTotalTerms(songs); //this adds a key to each song map labeled: "TOTALSONGS", whose value is the total words in the song after removing stop words
-		Map<String, TreeMap<String, Double>> TFMap = TermFreqCalcMap(songs); //Song Title --> Term --> Term Frequency(double)
+		Map<String, TreeMap<String, Double>> TFMap = termFreqCalcMap(songs); //Song Title --> Term --> Term Frequency(double)
 	}
 
 	public static void getTotalTerms(Map<String, TreeMap<String, Integer>> map) {
@@ -106,7 +106,7 @@ public class TF_IDF {
 		}
 	}
 	
-	private static Map<String, TreeMap<String, Double>> TermFreqCalcMap(Map<String, TreeMap<String, Integer>> map) {
+	private static Map<String, TreeMap<String, Double>> termFreqCalcMap(Map<String, TreeMap<String, Integer>> map) {
 		Map<String, TreeMap<String, Double>> TFMap = new TreeMap<>();
 		Set<String> songTitles = map.keySet();
 		Iterator<String> titleItr = songTitles.iterator();
@@ -126,6 +126,7 @@ public class TF_IDF {
 		}
 		return TFMap;
 	}
+	
 	private static Map<String, TreeMap<String, Double>> calcTFIDF(Map<String, TreeMap<String, Integer>> map) {
 	    Map<String, TreeMap<String, Double>> tfidfMap = new TreeMap<>();
 	    Map<String, Double> idfMap = calcIDF(map);
@@ -145,6 +146,7 @@ public class TF_IDF {
 	    }
 	    return tfidfMap;
 	}
+	
 	private static Map<String, Double> processQuery(String query, Map<String, Double> idfMap) {
 	    Map<String, Double> tfidfMap = new TreeMap<>();
 	    int totalTerms = 0;
@@ -166,6 +168,7 @@ public class TF_IDF {
 	    }
 	    return tfidfMap;
 	}
+	
 	private static Map<String, Double> rankSongs(Map<String, TreeMap<String, Double>> tfidfMap, Map<String, Double> queryTfidfMap) {
 	    Map<String, Double> scoreMap = new TreeMap<>();
 	    for (String song : tfidfMap.keySet()) {
@@ -180,7 +183,5 @@ public class TF_IDF {
 	        scoreMap.put(song, score);
 	    }
 	    return scoreMap;
-	}
-	
-}
+	}	
 }
